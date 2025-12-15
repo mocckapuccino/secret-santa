@@ -76,7 +76,7 @@ function generate() {
         return;
     }
 
-    // Exclusions : personne ne doit tomber sur quelqu'un de cette liste
+    // Définir les exclusions
     const exclusions = {
         "Marie": ["Thomas", "Laura"],
         "Thomas": ["Marie"],
@@ -90,26 +90,24 @@ function generate() {
     let receivers;
     let attempts = 0;
     const maxAttempts = 5000;
+    let success = false;
 
-    function isValid(names, receivers) {
-        return names.every((n, i) => {
-            // personne ne se tire elle-même
-            if (n === receivers[i]) return false;
-            // exclusions respectées
-            if (exclusions[n] && exclusions[n].includes(receivers[i])) return false;
-            return true;
+    while (!success && attempts < maxAttempts) {
+        attempts++;
+        receivers = [...names];
+        shuffle(receivers);
+
+        // Vérifier les exclusions et que personne ne se tire lui-même
+        success = names.every((giver, i) => {
+            const receiver = receivers[i];
+            return giver !== receiver && !(exclusions[giver] && exclusions[giver].includes(receiver));
         });
     }
 
-    do {
-        receivers = [...names];
-        shuffle(receivers);
-        attempts++;
-        if (attempts > maxAttempts) {
-            alert("Impossible de générer un tirage valide avec ces exclusions.");
-            return;
-        }
-    } while (!isValid(names, receivers));
+    if (!success) {
+        alert("Impossible de générer un tirage valide avec ces exclusions.");
+        return;
+    }
 
     const linksDiv = document.getElementById("links");
     linksDiv.innerHTML = "<h2>📎 Liens à envoyer</h2>";
